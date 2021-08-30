@@ -1,5 +1,5 @@
 
-const { response } = require('express');
+const { response, request } = require('express');
 
 const Usuario = require('../models/usuario');
 const bcryptjs = require('bcryptjs');
@@ -8,13 +8,14 @@ const usuariosGet = async(req, res= response)   => {
 
     //const {q,nombre,apikey} = req.query;
     const { limite = 5, desde = 0} = req.query;
-
+    const query = {estado: true};
     const [total, usuarios] = await Promise.all([
-        Usuario.countDocuments({estado: true}),
-        Usuario.find({estado: true})
+        Usuario.countDocuments(query),
+        Usuario.find(query)
             .skip(Number(desde))
             .limit(Number(limite))
         ])
+        
 
     res.json({
         total,
@@ -53,32 +54,23 @@ const usuariosPut = async(req, res= response) => {
     }
 
     const usuario = await Usuario.findByIdAndUpdate(id, resto);
-    const actUsuario = await Usuario.findById(id)
 
 
-    res.json({
-        msg: 'Usuario actualizado correctamente',
-        actUsuario
-    });
+    res.json(usuario);
 }    
 
-const usuariosDelete = async(req, res= response) => {
+const usuariosDelete = async(req=request, res= response) => {
     const {id} = req.params;
 
-    //fisicamente borrar
-    //const usuario = await Usuario.findByIdAndDelete(id);
-
     const usuario = await Usuario.findByIdAndUpdate(id, {estado: false});
-    res.json({
-        id
-    })
+    res.json(usuario);
 }    
 
 
 
 module.exports = {
     usuariosGet,
-    usuariosPost,
+    usuariosPost, 
     usuariosPut,
     usuariosDelete
 }
